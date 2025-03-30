@@ -15,7 +15,6 @@
 int main(int argc, char *argv[]){
     struct sockaddr_in sevr_addr, clin_addr;
     int sock_l, sock_c;
-    fd_set reads, cpy_reads;
     socklen_t clin_addr_sz;       //返回客户端套接字结构的大小
 
     if(argc < 2){
@@ -37,9 +36,20 @@ int main(int argc, char *argv[]){
         perror("listen error");
         exit(1);
     }
+    /*注意： 要明白这里为何要以“读信号“来监听“监听套接字”
+     *
+     *监听套接字（通过 socket() 创建 + listen() 启动监听）的核心功能
+     *是接受新连接，其工作流程如下：
+        1.当客户端发起连接（connect()）时，监听套接字会检测到“连接请求到达”。
 
+        2.此时，监听套接字变为可读状态，但不会直接接收数据，而是需要通过 accept() 提取新连接。
+     *
+     */
+
+    fd_set reads, cpy_reads;
     FD_ZERO(&reads);
     FD_SET(sock_l, &reads);
+    
     int fd_max = sock_l;     //保存最大的文件描述符
     int fd_num;
     struct timeval timeout;     //设置超时    
