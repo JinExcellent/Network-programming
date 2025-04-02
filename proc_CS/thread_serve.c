@@ -48,7 +48,10 @@ int main(int argc, char *argv[]){
 
     while (1) {
         clin_addr_sz = sizeof(clin_addr);
-        sock_c = accept(sock_l, (struct sockaddr *)&clin_addr, &clin_addr_sz);
+        if((sock_c = accept(sock_l, (struct sockaddr *)&clin_addr, &clin_addr_sz)) == -1){
+            perror("accept error");
+            continue;
+        }
 
         pthread_mutex_lock(&mutx);
         clin_socks[clin_count++] = sock_c;
